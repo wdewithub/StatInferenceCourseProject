@@ -69,9 +69,15 @@ So, in our case the distribution from our 1000 sample means should closely follo
 
 
 ```{r plot_normality_comp fig.height=4}
-library(ggplot2)
-g <- ggplot(aes(smeans)) + geom_histogram()+geom_density()  --> Hoe kan ik hier nu N(5,0.625) plotten ? Werkt code hieronder of ga naar stackoverflow verder zoeken. Ga ook kijken in les 5 rmd files.
+par(cex.main=0.75, cex.lab=0.80, cex.axis=0.80)
+hist(smeans,xlab="Sample average",main="Sample mean follows N(5,0.625) distribution ?")  
 
+--> Hoe kan ik hier nu N(5,0.625) plotten ? Werkt code hieronder of ga naar stackoverflow verder zoeken. Ga ook kijken in les 5 rmd files.
+
+hist(mtcars$mpg, freq=F, breaks=12)
+lines(density(mtcars$mpg), col="red")
+lines(seq(3, 9, by=1), dnorm(seq(3, 9, by=1),
+      mean(mtcars$mpg), sd(mtcars$mpg)), col="blue")
 
 g = d$mydata
     m<-mean(g)
