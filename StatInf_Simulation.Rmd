@@ -1,0 +1,89 @@
+---
+title: "StatInf_Simulation"
+author: "wdewit"
+date: "September 11, 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Overview
+
+In this report we will investigate how closely the distribution of the mean of 40 random variables, drawn from an exponential distribution with lamba=0.2, approximates the normal distribution with mean and standard deviation=5 as stated by the Central Limit Theorem. In order to obtain a distribution of the mean we will repeat the drawing of the 40 random variables a thousand times.
+
+#Simulations
+
+We first draw 40000 observations from an exponential distribution with lamba=0.2 and store them in a matrix of 1000 raws and 40 columns. 
+
+```{r simul}
+simul <- 1000
+n <- 40
+lambda <- 0.2
+
+rdraws <- rexp(n*simul,lambda)
+rmatrix <- matrix(rdraws, nrow=simul, ncol=n)
+```
+
+#Sample mean versus theoretical mean
+
+For each of the 1000 samples of 40 observations from the exponential distribution we calulated their average value. The average of these 40 sample averages reaches 5.02. This is very close to the theoretical mean which is 1/lambda, which in our case with lambda=0.2 gets down to 5.
+
+```{r means}
+set.seed=3
+smeans <- apply(rmatrix,1,mean)
+smean <- mean(smeans)
+theormean <- 1/lambda
+```
+
+```{r plot_mean_comp fig.height=4}
+par(cex.main=0.75, cex.lab=0.80, cex.axis=0.80)
+hist(smeans,xlab="Sample average",main="Theoretical mean vs sample mean of 1000 simulations of average of 40 draws from exp(lamba=0.2)")
+abline(v=theormean, lw=4, col="red")
+abline(v=smean, lw=4, col="orange", lty=2)
+```
+
+```{r}
+print(c('The sample mean is: ',round(smean,2),'.'))
+print(c('The theoretical mean is: ',theormean,'.'))
+```
+
+#Sample variance versus theoretical variance
+
+We know that the variance of the sample mean is the population variance divided by n. As the variance from an exponential distribution=(1/lambda)^2, the theoretical variance of the sample mean is (1/0.2)^2/40=0.625. The variance from our simulated sample means is very near to this theoretical number, namely 0.65. 
+
+```{r var}
+svar <- var(smeans)
+theorvar <- (1/lambda)^2/n
+print(c('The sample variance is: ',round(svar,2),'.'))
+print(c('The theoretical variance is: ',theorvar,'.'))  
+```
+
+
+#Distribution approximately normal ?
+
+The Central Limit Theorem states that when you draw a large sample of observations from the same distribution with replacement (iid), their sample mean follows a normal distribution with the mean=population mean and SD=population SD/square root(sample size). 
+
+So, in our case the distribution from our 1000 sample means should closely follow a N(mean=5,var=0.625). In order to proof this we repeat our previous histogram of sample means and plot a N(5,0.625) density on top.
+
+
+```{r plot_normality_comp fig.height=4}
+library(ggplot2)
+g <- ggplot(aes(smeans)) + geom_histogram()+geom_density()  --> Hoe kan ik hier nu N(5,0.625) plotten ? Werkt code hieronder of ga naar stackoverflow verder zoeken. Ga ook kijken in les 5 rmd files.
+
+
+g = d$mydata
+    m<-mean(g)
+    std<-sqrt(var(g))
+    hist(g, density=20, breaks=20, prob=TRUE, 
+         xlab="x-variable", ylim=c(0, 2), 
+         main="normal curve over histogram")
+    curve(dnorm(x, mean=m, sd=std), 
+          col="darkblue", lwd=2, add=TRUE, yaxt="n")
+
+
+```
+
+
+##Zie les nr 5 zijn code
