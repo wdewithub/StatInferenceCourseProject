@@ -22,7 +22,6 @@ simul <- 1000
 n <- 40
 lambda <- 0.2
 set.seed <- 3
-
 rdraws <- rexp(n*simul,lambda)
 rmatrix <- matrix(rdraws, nrow=simul, ncol=n)
 ```
@@ -35,20 +34,17 @@ For each of the 1000 samples of 40 observations from the exponential distributio
 smeans <- apply(rmatrix,1,mean)
 smean <- mean(smeans)
 theormean <- 1/lambda
+print(c('The sample mean is: ',round(smean,2),'.'))
+print(c('The theoretical mean is: ',theormean,'.'))
 ```
 
-```{r plot_mean_comp, fig.height=4}
+```{r plot_mean_comp, fig.height=3}
 par(cex.main=0.75, cex.lab=0.80, cex.axis=0.80)
 hist(smeans,xlab="Sample average",
      main="Theoretical mean vs sample mean of 1000 simulations of average of 40 draws
      from exp(lamba=0.2)")
 abline(v=theormean, lw=4, col="red")
 abline(v=smean, lw=4, col="orange", lty=2)
-```
-
-```{r}
-print(c('The sample mean is: ',round(smean,2),'.'))
-print(c('The theoretical mean is: ',theormean,'.'))
 ```
 
 #Sample variance versus theoretical variance
@@ -67,14 +63,23 @@ print(c('The theoretical variance is: ',theorvar,'.'))
 
 The Central Limit Theorem states that when you draw a large sample of observations from the same distribution with replacement (iid), their sample mean follows a normal distribution with the mean=population mean and SD=population SD/square root(sample size). 
 
-So, in our case the distribution from our 1000 sample means should closely follow a N(mean=5,var=0.625). In order to proof this we plot the density function of our sample means and plot a N(mean=5,var=0.625) density on top (red line). As you see our empirical density closely follows a N(mean=5,var=0.625).
+So, in our case the distribution from our 1000 sample means should closely follow a N(mean=5,var=0.625). In the plot below you notice that our empirical density does closely follows a N(mean=5,var=0.625)(red line).
 
-
-```{r plot_normality_comp, fig.height=4}
+```{r plot_normality_comp, fig.height=3}
 library(ggplot2)
 smeansdf <- as.data.frame(smeans)
-g <- ggplot(data=smeansdf,aes(x = smeans)) 
+g <- ggplot(data=smeansdf,aes(x = smeans),main="Illustrating the CLT") 
 g <- g + geom_histogram(aes(y = ..density..), fill = "white", binwidth=0.5, colour = "black")
 g + stat_function(fun=dnorm,colour="red", 
                   size=1.5, args=list(mean=1/lambda, sd=(1/lambda)/sqrt(n)))+theme_bw()
+```
+
+Note that a sample of 1000 random variables drawn from our exp(0.2) distribution is far from being normal.
+
+```{r plot_exp_ls, fig.height=3}
+rexp1000 <- rexp(n=1000,lambda)
+rexp1000df <- as.data.frame(rexp1000)
+g <- ggplot(data=rexp1000df,aes(x = rexp1000),main="Distribution of 1000 draws from exp(0.2)") 
+g <- g + geom_histogram(aes(y = ..density..), fill = "white", binwidth=0.5, colour = "black")
+g + geom_density(size=1.5, colour="red")+theme_bw()
 ```
