@@ -11,16 +11,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #Overview
 
-In this report we will investigate how closely the distribution of the mean of 40 random variables, drawn from an exponential distribution with lamba=0.2, approximates the normal distribution with mean and standard deviation=5 as stated by the Central Limit Theorem. In order to obtain a distribution of the mean we will repeat the drawing of the 40 random variables a thousand times.
+In this report we will investigate how closely the distribution of the mean of 40 random variables, drawn from an exponential distribution with lamba=0.2, approximates the normal distribution with mean=5 and standard deviation=0.79 as stated by the Central Limit Theorem. In order to obtain a distribution of the mean we will repeat the drawing of the 40 random variables a thousand times.
 
 #Simulations
 
-We first draw 40000 observations from an exponential distribution with lamba=0.2 and store them in a matrix of 1000 raws and 40 columns. 
+We first draw 40000 observations from an exponential distribution with lamba=0.2 and store them in a matrix of 1000 rows and 40 columns. 
 
 ```{r simul}
 simul <- 1000
 n <- 40
 lambda <- 0.2
+set.seed <- 3
 
 rdraws <- rexp(n*simul,lambda)
 rmatrix <- matrix(rdraws, nrow=simul, ncol=n)
@@ -28,18 +29,19 @@ rmatrix <- matrix(rdraws, nrow=simul, ncol=n)
 
 #Sample mean versus theoretical mean
 
-For each of the 1000 samples of 40 observations from the exponential distribution we calulated their average value. The average of these 40 sample averages reaches 5.02. This is very close to the theoretical mean which is 1/lambda, which in our case with lambda=0.2 gets down to 5.
+For each of the 1000 samples of 40 observations from the exponential distribution we calulated their average value. The average of these 40 sample averages (dotted orange line) is very close to the theoretical mean which is 1/lambda, or 5 (solid red line).
 
 ```{r means}
-set.seed=3
 smeans <- apply(rmatrix,1,mean)
 smean <- mean(smeans)
 theormean <- 1/lambda
 ```
 
-```{r plot_mean_comp fig.height=4}
+```{r plot_mean_comp, fig.height=4}
 par(cex.main=0.75, cex.lab=0.80, cex.axis=0.80)
-hist(smeans,xlab="Sample average",main="Theoretical mean vs sample mean of 1000 simulations of average of 40 draws from exp(lamba=0.2)")
+hist(smeans,xlab="Sample average",
+     main="Theoretical mean vs sample mean of 1000 simulations of average of 40 draws
+     from exp(lamba=0.2)")
 abline(v=theormean, lw=4, col="red")
 abline(v=smean, lw=4, col="orange", lty=2)
 ```
@@ -51,7 +53,7 @@ print(c('The theoretical mean is: ',theormean,'.'))
 
 #Sample variance versus theoretical variance
 
-We know that the variance of the sample mean is the population variance divided by n. As the variance from an exponential distribution=(1/lambda)^2, the theoretical variance of the sample mean is (1/0.2)^2/40=0.625. The variance from our simulated sample means is very near to this theoretical number, namely 0.65. 
+We know that the variance of the sample mean is the population variance divided by n. As the variance from an exponential distribution=(1/lambda)^2, the theoretical variance of the sample mean is (1/0.2)^2/40=0.625. The variance from our simulated sample means is very near to this theoretical number.  
 
 ```{r var}
 svar <- var(smeans)
@@ -65,31 +67,14 @@ print(c('The theoretical variance is: ',theorvar,'.'))
 
 The Central Limit Theorem states that when you draw a large sample of observations from the same distribution with replacement (iid), their sample mean follows a normal distribution with the mean=population mean and SD=population SD/square root(sample size). 
 
-So, in our case the distribution from our 1000 sample means should closely follow a N(mean=5,var=0.625). In order to proof this we repeat our previous histogram of sample means and plot a N(5,0.625) density on top.
+So, in our case the distribution from our 1000 sample means should closely follow a N(mean=5,var=0.625). In order to proof this we plot the density function of our sample means and plot a N(mean=5,var=0.625) density on top (red line). As you see our empirical density closely follows a N(mean=5,var=0.625).
 
 
-```{r plot_normality_comp fig.height=4}
-par(cex.main=0.75, cex.lab=0.80, cex.axis=0.80)
-hist(smeans,xlab="Sample average",main="Sample mean follows N(5,0.625) distribution ?")  
-
---> Hoe kan ik hier nu N(5,0.625) plotten ? Werkt code hieronder of ga naar stackoverflow verder zoeken. Ga ook kijken in les 5 rmd files.
-
-hist(mtcars$mpg, freq=F, breaks=12)
-lines(density(mtcars$mpg), col="red")
-lines(seq(3, 9, by=1), dnorm(seq(3, 9, by=1),
-      mean(mtcars$mpg), sd(mtcars$mpg)), col="blue")
-
-g = d$mydata
-    m<-mean(g)
-    std<-sqrt(var(g))
-    hist(g, density=20, breaks=20, prob=TRUE, 
-         xlab="x-variable", ylim=c(0, 2), 
-         main="normal curve over histogram")
-    curve(dnorm(x, mean=m, sd=std), 
-          col="darkblue", lwd=2, add=TRUE, yaxt="n")
-
-
+```{r plot_normality_comp, fig.height=4}
+library(ggplot2)
+smeansdf <- as.data.frame(smeans)
+g <- ggplot(data=smeansdf,aes(x = smeans)) 
+g <- g + geom_histogram(aes(y = ..density..), fill = "white", binwidth=0.5, colour = "black")
+g + stat_function(fun=dnorm,colour="red", 
+                  size=1.5, args=list(mean=1/lambda, sd=(1/lambda)/sqrt(n)))+theme_bw()
 ```
-
-
-##Zie les nr 5 zijn code
