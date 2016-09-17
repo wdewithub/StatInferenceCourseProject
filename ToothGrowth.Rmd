@@ -35,10 +35,9 @@ summary(ToothGrowth$len)
 
 Regardless of the deliverly method, higher doses of Vitamin C seem to lead to higher tooth lengths. With the exception of the highest dose, vitamin C intake by orange juice seems to lead to longer teeth than vitamin C intake by asorbic acid. At the highest dose the median tooth length seems similar between both delivery methods, although that the outcome of asorbic acid seems far more uncertain than the outcome of orange juice. Therefore it seems that the best results on teeth growth are obtained by vitamin C delivery via orange juice at the highest dose.
 
-boxplot maken van length per supp & dose
 ```{r boxplot, fig.height=4}
 par(mfrow=c(1,1),cex.main=0.75)
-boxplot(len~dose+supp,data=ToothGrowth, xlab="treatment (dose x delivery)",ylab="tooth length", main="Tooth length by treatment")
+boxplot(len~dose+supp,data=ToothGrowth, xlab="treatment (dose x delivery)", ylab="tooth length", main="Tooth length by treatment")
 ```
 
 ## Is tooth growth dependent on supp and dose ?
@@ -47,13 +46,35 @@ Let's now perform some formal testing whether there is a statistically significa
 
 
 ```{r t-test}
-
-Dit naar een loop omschrijven van 15 loops want t-test kan maar 2 groepen vgl telkens. Zet p-value resultaat telkens in een p-vector
-
-treatment <- as.factor(paste(ToothGrowth$dose,"_",ToothGrowth$supp))
-t.test(len ~treatment, data=ToothGrowth,var.equal=FALSE)
-
-Erna p.adjust(pvalues,method="BH",n=15)
+ToothGrowth$treatment <- as.factor(paste(ToothGrowth$dose,"_",ToothGrowth$supp))
+iter <- 1
+pvalues <- matrix(rep(0,45),nrow=15,ncol=3)
+for (i in 1:5) {
+    group1 <- subset(ToothGrowth,treatment==levels(treatment)[i])
+    j <- i+1
+    while (j <= 6) {
+        group2 <- subset(ToothGrowth,treatment==levels(treatment)[j])
+        to_test <- rbind(group1,group2)
+        pvalues[iter,1] <- levels(ToothGrowth$treatment)[i]
+        pvalues[iter,2] <- levels(ToothGrowth$treatment)[j]
+        pvalues[iter,3] <- t.test(len ~treatment, data=to_test,var.equal=FALSE)$p.value
+        j <- j+1
+        iter <- iter+1
+    }
+}
+names(pvalues) <- c("group1", "group2", "pvalues")
+pvaluesadj <- p.adjust(pvalues[,3],method='BH', n=15)
+cbind(pvalues,pvaluesadj)
 ```
 
+For any pairwise comparision, we will reject the null hypothesis that both treatments are equal when the adjusted p-value is smaller than 0.05. 
+
+First focussing on the pairwise comparisons of different doses with the same application method, we can conclude with 95% confidence that higher doses of Vitamin C lead to higher tooth length. 
+
+Next we focus whether vitamin C supplied by orange juice versus asorbic acid leads to different tooth length. Here the conclusions are mixed, although ath the lowest level there clearly is a larger tooth length for oranje juice suppliances than for ascorbic acid, this no longer holds for higher doses due to increased uncertainty in the outcome of either delivery method.
+
+Overall, when ranking the treatment methods 0.5 VC has the shortest tooth length, followed by 0.5 OJ and 1 VC. The next best tooth length is obtained by 1 OJ. There seems to be weak evidence that 2 OJ leads to larger tooth length than 1 OJ. However, there is no evidence that 2 OJ and 2 VC lead to different tooth length.   
+
 ## Conclusions
+
+We examined the effect of 3 different doses and 2 different supply methods of Vitamin C on tooth length of Guinea Pigs. We concluded that 2 mg vitamin C/day supplied by orange juice or ascorbic acid lead to the best tooth growth. 
